@@ -69,6 +69,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sp2.wsgi.application'
 
+# 用户登录url
+LOGIN_URL = "/user/login/"
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 

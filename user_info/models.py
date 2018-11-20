@@ -1,11 +1,4 @@
 from django.db import models
-
-# Create your models here.
-# !/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Time    : 2018/11/19 16:31
-# @Author  : stephen
-# @File    : random_name.py
 from myrandom import random_user_info
 
 
