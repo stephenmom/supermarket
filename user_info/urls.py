@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^member/$', views.Member.as_view(), name="member"),  # 用户中心
     url(r'^logout/$', views.Logout.as_view(), name="logout"),  # 注销
     url(r'^info/$', views.Info.as_view(), name="info"),  # 个人资料
+    url(r'^send_msg_phone/$', views.send_msg_phone, name="send_msg_phone"),  # 个人资料
 ]
