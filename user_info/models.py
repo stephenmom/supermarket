@@ -10,7 +10,7 @@ class Users(models.Model):
         (1, '女性'),
         (2, '保密'),
     )
-    user_head = models.ImageField(upload_to='user/%Y%m/%d', verbose_name='头像', null=True, blank=True, max_length=500)
+    user_head = models.ImageField(upload_to='user', verbose_name='头像', null=True, blank=True, max_length=500)
     user_name = models.CharField(max_length=32, verbose_name='用户名', null=True)
     user_password = models.CharField(max_length=16)
     user_telphone = models.CharField(max_length=15, verbose_name='手机号码')
