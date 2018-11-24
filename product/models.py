@@ -1,3 +1,4 @@
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 
 # Create your models here.
@@ -86,7 +87,7 @@ class ProSPU(models.Model):
         详情
     """
     spu_name = models.CharField(max_length=32, verbose_name='商品spu名')
-    spu_introduce = models.TextField(verbose_name='商品spu详情', null=True, blank=True)
+    spu_introduce = RichTextUploadingField(verbose_name='商品spu详情', null=True, blank=True)
     spu_add_time = models.DateTimeField(auto_now_add=True, verbose_name="商品spu添加时间")
     spu_edit_time = models.DateTimeField(auto_now=True, verbose_name="商品spu修改时间")
     spu_status = models.BooleanField(default=False, verbose_name="商品spu删除状态")
