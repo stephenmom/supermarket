@@ -1,14 +1,28 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import View
-
-# Create your views here.
 from product.models import ProCategory, ProSKU
+from product.models import Carousel, Activity, ActivityRegion
 
 
 class Show(View):
     def get(self, request):
+        """首页"""
+        # 获取轮播
+        carousel = Carousel.objects.filter(carousel_status=False).order_by("-carousel_order")
+
+        # 获取活动
+        acts = Activity.objects.all()
+
+        # 获取特色专区
+        act_zones = ActivityRegion.objects.filter(region_show=True, region_status=False).order_by("-region_order")
+
+        # 渲染数据
         context = {
+            "all_carousel": carousel,
+            "acts": acts,
+            "act_zones": act_zones,
         }
+        print(act_zones[0].region_name)
         return render(request, "shop/index.html", context)
 
     def post(self, request):
@@ -35,3 +49,19 @@ class Category(View):
         context = {
         }
         return render(request, "shop/category.html", context)
+
+
+class ProDetail(View):
+    def get(self, request, id):
+        try:
+            goodsSku = ProSKU.objects.get(pk=id, pro_show=1)
+        except ProSKU.DoesNotExist:
+            # 跳转到首页
+            return redirect("product:show")
+        context = {
+            "goodsSku": goodsSku
+        }
+        return render(request, "shop/detail.html", context)
+
+    def post(self, request):
+        pass

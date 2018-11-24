@@ -1,7 +1,7 @@
 from django.db import models
 
-
 # Create your models here.
+from sp2 import settings
 
 
 class ProCategory(models.Model):
@@ -53,10 +53,16 @@ class ProSKU(models.Model):
     pro_name = models.CharField(max_length=32, verbose_name='商品名')
     pro_introduce = models.CharField(max_length=50, verbose_name='商品简介', null=True, blank=True)
     pro_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name="商品价格")
-    pro_unit = models.CharField(max_length=10, verbose_name='商品单位', default="个")
+    pro_unit = models.ForeignKey(to="ProductUnit", verbose_name="单位")
     pro_inventory = models.IntegerField(verbose_name='商品库存', default=0)
     pro_sales_volume = models.IntegerField(verbose_name='商品销量', null=True, blank=True)
     pro_logo = models.ImageField(upload_to='pro', verbose_name='商品LOGO地址', null=True, blank=True, max_length=500)
+
+    def show_logo(self):
+        return "<img style='width:80px;height:80px' src='{}{}'/>".format(settings.MEDIA_URL, self.pro_logo)
+
+    show_logo.allow_tags = True
+    show_logo.short_description = "pro_logo"
     pro_show = models.IntegerField(choices=SHOW_STATUS_CHOICES, verbose_name='上架状态', default=1)
     pro_category_id = models.ForeignKey(to='ProCategory', on_delete=models.CASCADE, verbose_name="商品分类id")
     pro_spu_id = models.ForeignKey(to='ProSPU', on_delete=models.CASCADE, verbose_name="商品spuid")
@@ -80,7 +86,7 @@ class ProSPU(models.Model):
         详情
     """
     spu_name = models.CharField(max_length=32, verbose_name='商品spu名')
-    spu_introduce = models.CharField(max_length=50, verbose_name='商品spu详情', null=True, blank=True)
+    spu_introduce = models.TextField(verbose_name='商品spu详情', null=True, blank=True)
     spu_add_time = models.DateTimeField(auto_now_add=True, verbose_name="商品spu添加时间")
     spu_edit_time = models.DateTimeField(auto_now=True, verbose_name="商品spu修改时间")
     spu_status = models.BooleanField(default=False, verbose_name="商品spu删除状态")
@@ -110,14 +116,14 @@ class PhotoAlbum(models.Model):
     photo_status = models.BooleanField(default=False, verbose_name="图片删除状态")
 
     def __str__(self):
-        return self.photo_url
+        return self.photo_url.__str__()
 
     class Meta:
         verbose_name = "商品相册管理"
         verbose_name_plural = verbose_name
 
 
-class PhotoUnit(models.Model):
+class ProductUnit(models.Model):
     """
         商品单位表
         ID
@@ -237,7 +243,7 @@ class ActivityRegionProduct(models.Model):
     ARP_status = models.BooleanField(default=False, verbose_name="专区活动商品删除状态")
 
     def __str__(self):
-        return self.ARP_region_id
+        return self.ARP_region_id.__str__()
 
     class Meta:
         verbose_name = "专区活动商品管理"

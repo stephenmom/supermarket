@@ -1,47 +1,60 @@
-from product.models import ProCategory, ProSKU, PhotoAlbum, ProSPU
+from product.models import ProCategory, ProSKU, PhotoAlbum, ProSPU, Carousel, ProductUnit, Activity, ActivityRegion,ActivityRegionProduct
 from django.contrib import admin
 
+"""
+注册方式:
+admin.site.register(模型类)
 
-class ProCategoryInline(admin.StackedInline):
-    model = ProSKU  # 该处配置多端表
+装饰器形式注册
+@admin.register(模型类)
+class XxxAdmin(admin.ModelAdmin):
+    # 自定义后显示的类
+"""
+
+
+# admin.site.register(Category)
+@admin.register(ProCategory)
+class CategoryAdmin(admin.ModelAdmin):
+    # 自定义后台
+    list_display = ['id', 'category_name', 'category_introduce', 'category_add_time', 'category_status']
+    list_display_links = ['id', 'category_name', 'category_introduce']
+
+
+admin.site.register(ProductUnit)
+
+admin.site.register(ProSPU)
+
+
+# 商品sku
+class GalleryInline(admin.TabularInline):
+    model = PhotoAlbum
     extra = 1
 
 
 @admin.register(ProSKU)
-class ProCategoryAdmin(admin.ModelAdmin):
-    # 配置项
-    #  每页显示多少项
-    list_per_page = 5
+class GoodsSkuAdmin(admin.ModelAdmin):
+    list_display = ["id", 'pro_name', 'pro_price', 'pro_unit', 'pro_inventory', 'pro_sales_volume', 'show_logo',
+                    'pro_show', 'pro_category_id']
+    list_display_links = ["id", 'pro_name', 'pro_price']
 
-    # 设置显示字段
-    list_display = ['pro_name',
-                    'pro_introduce',
-                    'pro_price',
-                    'pro_unit',
-                    'pro_inventory',
-                    'pro_sales_volume',
-                    'pro_logo',
-                    'pro_show',
-                    'pro_status']  # 更改名字默认值.verbose_name='上级区域'
-
-    # 在字段上添加一个连接, 能点进去编辑
-    list_display_links = ['pro_introduce', 'pro_name']
-
-    # 过滤器
-    list_filter = ['pro_name']
-
-    # 添加搜索框
-    search_fields = ['pro_name']
-
-    # 编辑或者添加的字段
-    # fields = ['class_name', 'class_intro']
-
-    # 将多端配置添加到管理界面
-    # inlines = [
-    #     ProCategoryInline
-    # ]
+    search_fields = ['pro_name', 'pro_price']
+    inlines = [
+        GalleryInline,
+    ]
 
 
-admin.site.register(ProCategory)
-admin.site.register(ProSPU)
-admin.site.register(PhotoAlbum)
+# 首页管理
+admin.site.register(Carousel)
+admin.site.register(Activity)
+
+
+class ActivityZoneGoodsInline(admin.TabularInline):
+    model = ActivityRegionProduct
+    extra = 2
+
+
+@admin.register(ActivityRegion)
+class ActivityZoneAdmin(admin.ModelAdmin):
+    inlines = [
+        ActivityZoneGoodsInline
+    ]
