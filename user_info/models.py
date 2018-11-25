@@ -20,3 +20,10 @@ class Users(models.Model):
     user_address = models.CharField(max_length=40, verbose_name="详细地址", null=True)
     user_hometown = models.CharField(max_length=43, verbose_name="故乡", null=True)
     is_delete = models.BooleanField(default=False, verbose_name="删除状态")
+
+    def __str__(self):
+        return self.user_name
+
+    class Meta:
+        verbose_name = "用户管理"
+        verbose_name_plural = verbose_name

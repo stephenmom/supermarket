@@ -6,16 +6,17 @@ from product.models import Carousel, Activity, ActivityRegion
 
 class Show(View):
     def get(self, request):
-        """首页"""
+        """
+        显示首页,需要获取
+        :param request:
+        :return:
+        """
         # 获取轮播
         carousel = Carousel.objects.filter(carousel_status=False).order_by("-carousel_order")
-
         # 获取活动
         acts = Activity.objects.all()
-
         # 获取特色专区
         act_zones = ActivityRegion.objects.filter(region_show=True, region_status=False).order_by("-region_order")
-
         # 渲染数据
         context = {
             "all_carousel": carousel,
@@ -45,7 +46,7 @@ class Category(View):
         # 获取当前分类的中所有的sku信息,用于展示
         prosku_ob = ProSKU.objects.filter(pro_category_id=select_category, pro_status=False, pro_show=1)
         # 排序规则的列表
-        order_rule = ["id", "pro_sales_volume", "-pro_price", "pro_price", "pro_add_time"]
+        order_rule = ["id", "pro_sales_volume", "-pro_price", "pro_price", "-pro_add_time"]
         # 将排序id强制类型转换为 int类型
         int_order = 0
         # 如果字符串id不为int类型,那么就直接赋值为 0
