@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.views import View
 from django_redis import get_redis_connection
 from db.base_view import BaseVerifyView
@@ -105,7 +105,7 @@ class Cart(View):
         context = {
 
         }
-        return render(request, "shop/shopcart.html", context)
+        return redirect("cart:cart_info")
 
     def post(self, request):
         context = {

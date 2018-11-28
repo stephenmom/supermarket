@@ -78,7 +78,7 @@ class OderInfo(models.Model):
     user_id = models.ForeignKey(to="user_info.Users", verbose_name="用户id")
     order_user_name = models.CharField(max_length=32, verbose_name="收货人")
     order_user_phone = models.CharField(max_length=16, verbose_name="收货人电话")
-    order_address = models.ForeignKey(to="user_info.UserAddress", verbose_name="订单地址")
+    order_address = models.CharField(max_length=50, verbose_name="订单地址")
     order_status_now = models.IntegerField(choices=ORDER_STATUS, verbose_name='订单状态', default=0)
     order_transport = models.ForeignKey(to="Transport", verbose_name="运输方式")
     order_payment = models.ForeignKey(to="Payment", verbose_name="付款方式")

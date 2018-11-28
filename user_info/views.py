@@ -97,7 +97,7 @@ class Logout(BaseVerifyView):
 
 class Address(BaseVerifyView):
     """
-    用户地址
+    收货地址
     """
 
     # 用户地址
@@ -108,7 +108,7 @@ class Address(BaseVerifyView):
     def get(self, request):
         tellphone = request.session.get("tellphone")
         user = Users.objects.get(user_telphone=tellphone)
-        addrs = UserAddress.objects.filter(user_id=user)
+        addrs = UserAddress.objects.filter(user_id=user).order_by("-default_address")
         context = {
             "addrs": addrs
         }
@@ -120,7 +120,7 @@ class Address(BaseVerifyView):
 
 class AddressAdd(BaseVerifyView):
     """
-    添加用户地址
+    添加收货地址
     """
 
     # 用户地址
@@ -129,14 +129,21 @@ class AddressAdd(BaseVerifyView):
     # 第三步保存用户的地址详情
 
     def get(self, request):
+        tellphone = request.session.get("tellphone")
+        user = Users.objects.get(user_telphone=tellphone)
+        if UserAddress.objects.filter(user_id=user).count() >= 4:
+            return redirect(reverse("user_info:address"))
         context = {
 
         }
         return render(request, "shop/address.html", context)
 
     def post(self, request):
+
         tellphone = request.session.get("tellphone")
         user = Users.objects.get(user_telphone=tellphone)
+        if UserAddress.objects.filter(user_id=user).count() >= 4:
+            return redirect(reverse("user_info:address"))
         hcity = request.POST.get("hcity")
         hproper = request.POST.get("hproper")
         harea = request.POST.get("harea")
@@ -185,6 +192,87 @@ class Info(BaseVerifyView):
         user.user_hometown = request.POST.get("hometown")
         user.save()
         return redirect("user_info:info")
+
+
+class ChangeDefaultAddress(BaseVerifyView):
+    """
+    修改默认的收货地址
+    """
+
+    def get(self, request):
+        context = {
+        }
+        return redirect("user_info:login")
+
+    def post(self, request):
+        tellphone = request.session.get("tellphone")
+        user = Users.objects.get(user_telphone=tellphone)
+        address_pk = request.POST.get("adppk")
+        UserAddress.objects.filter(user_id=user).update(default_address=False)
+        UserAddress.objects.filter(pk=address_pk).update(default_address=True)
+        context = {
+            "res": 0
+        }
+        return JsonResponse(context)
+
+
+class AddressEdit(BaseVerifyView):
+    """
+    编辑收货地址
+    """
+
+    def get(self, request, addpk):
+        tellphone = request.session.get("tellphone")
+        user = Users.objects.get(user_telphone=tellphone)
+        addr = UserAddress.objects.filter(pk=addpk, user_id=user).first()
+        context = {
+            "addr": addr
+        }
+        return render(request, "shop/addressedit.html", context)
+
+    def post(self, request, addpk):
+        tellphone = request.session.get("tellphone")
+        user = Users.objects.get(user_telphone=tellphone)
+        addpk = request.POST.get("addpk")
+        hcity = request.POST.get("hcity")
+        hproper = request.POST.get("hproper")
+        harea = request.POST.get("harea")
+        address_detail = request.POST.get("address_detail")
+        consignee_name = request.POST.get("consignee_name")
+        consignee_phone = request.POST.get("consignee_phone")
+        isdefault = False
+        if request.POST.get("isdefault"):
+            UserAddress.objects.filter(user_id=user).update(default_address=False)
+            isdefault = True
+        UserAddress.objects.filter(pk=addpk, user_id=user).update(
+            goods_user_name=consignee_name,
+            goods_user_phone=consignee_phone,
+            goods_detail=address_detail,
+            default_address=isdefault,
+            province_id=hcity,
+            city_id=hproper,
+            district_id=harea,
+        )
+        return redirect("user_info:address")
+
+
+class DelAddress(View):
+    """
+        删除收货地址
+    """
+
+    def get(self, request):
+        return JsonResponse({"res": -1, "error": "访问方式错误"})
+
+    def post(self, request):
+        tellphone = request.session.get("tellphone")
+        user = Users.objects.get(user_telphone=tellphone)
+        addpk = request.POST.get("addpk")
+        if not user:
+            return JsonResponse({"res": 1, "errmsg": "没有登陆!"})
+        # 删除的时候最好 用户的id条件加上
+        UserAddress.objects.filter(user_id=user, pk=addpk).delete()
+        return JsonResponse({"res": 0, "error": "到时候再说"})
 
 
 def send_msg_phone(request):
