@@ -25,5 +25,7 @@ urlpatterns = [
                   url(r'^product/', include("product.urls", namespace="product")),
                   url(r'^cart/', include("cart.urls", namespace="cart")),
                   url(r'^ckeditor/', include("ckeditor_uploader.urls")),
+                  url(r'^search/', include('haystack.urls')),
+                  # 添加自己的应用的子路由
                   url(r'^favicon.ico$', RedirectView.as_view(url=r'static/favicon.ico'))
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

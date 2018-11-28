@@ -7,7 +7,7 @@ from django.views import View
 from db.base_view import BaseVerifyView
 from myrandom import random_user_info
 from user_info.helper import send_sms
-from user_info.models import Users
+from user_info.models import Users, UserAddress
 import re
 from django_redis import get_redis_connection
 
@@ -95,6 +95,70 @@ class Logout(BaseVerifyView):
         return redirect(reverse("user_info:login"))
 
 
+class Address(BaseVerifyView):
+    """
+    用户地址
+    """
+
+    # 用户地址
+    # 第一步渲染静态页面
+    # 第二步获取用户填写的地址详情,
+    # 第三步保存用户的地址详情
+
+    def get(self, request):
+        tellphone = request.session.get("tellphone")
+        user = Users.objects.get(user_telphone=tellphone)
+        addrs = UserAddress.objects.filter(user_id=user)
+        context = {
+            "addrs": addrs
+        }
+        return render(request, "shop/gladdress.html", context)
+
+    def post(self, request):
+        return redirect(reverse("user_info:login"))
+
+
+class AddressAdd(BaseVerifyView):
+    """
+    添加用户地址
+    """
+
+    # 用户地址
+    # 第一步渲染静态页面
+    # 第二步获取用户填写的地址详情,
+    # 第三步保存用户的地址详情
+
+    def get(self, request):
+        context = {
+
+        }
+        return render(request, "shop/address.html", context)
+
+    def post(self, request):
+        tellphone = request.session.get("tellphone")
+        user = Users.objects.get(user_telphone=tellphone)
+        hcity = request.POST.get("hcity")
+        hproper = request.POST.get("hproper")
+        harea = request.POST.get("harea")
+        address_detail = request.POST.get("address_detail")
+        consignee_name = request.POST.get("consignee_name")
+        consignee_phone = request.POST.get("consignee_phone")
+        isdefault = False
+        if request.POST.get("isdefault"):
+            UserAddress.objects.filter(user_id=user).update(default_address=False)
+            isdefault = True
+        UserAddress.objects.create(user_id=user,
+                                   goods_user_name=consignee_name,
+                                   goods_user_phone=consignee_phone,
+                                   goods_detail=address_detail,
+                                   default_address=isdefault,
+                                   province_id=hcity,
+                                   city_id=hproper,
+                                   district_id=harea, )
+
+        return redirect(reverse("user_info:address"))
+
+
 class Info(BaseVerifyView):
     """
     用户个人资料
@@ -111,13 +175,16 @@ class Info(BaseVerifyView):
     def post(self, request):
         tellphone = request.session.get("tellphone")
         user = Users.objects.get(user_telphone=tellphone)
-        user.user_head = request.FILES.get("user_head")
+        if request.FILES.get("user_head"):
+            user.user_head = request.FILES.get("user_head")
+        user.user_name = request.POST.get("nickname")
+        user.user_gender = request.POST.get("gender")
+        user.user_brith = request.POST.get("birth_of_date")
+        user.user_school = request.POST.get("school")
+        user.user_address = request.POST.get("address")
+        user.user_hometown = request.POST.get("hometown")
         user.save()
-
-        context = {
-            "user": user
-        }
-        return render(request, "shop/infor.html", context)
+        return redirect("user_info:info")
 
 
 def send_msg_phone(request):

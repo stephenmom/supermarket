@@ -53,6 +53,32 @@ class CartAdd(View):
         return JsonResponse({"res": 4, "errmsg": "添加成功"})
 
 
+class CartChange(View):
+    def get(self, request):
+
+        return JsonResponse({"res": "get方法", "errmsg": "get方法"})
+
+    def post(self, request):
+        tellphone = request.session.get("tellphone")
+        if not tellphone:
+            return JsonResponse({"res": -1, "errmsg": "没有登录"})
+        user = Users.objects.get(user_telphone=tellphone)
+        sku_id = request.POST.get("sku_id")
+        if not sku_id:
+            return JsonResponse({"res": 0, "errmsg": "数据不完整"})
+
+        # 判断商品是否存在
+        sku = ProSKU.objects.filter(pk=sku_id).first()
+        if not sku:
+            return JsonResponse({"res": 2, "errmsg": "商品不存在"})
+
+        # 删除购物车记录
+        conn = get_redis_connection("default")
+        cart_key = 'card_%d' % user.pk
+        conn.hdel(cart_key, sku_id)
+        return JsonResponse({"res": 4, "errmsg": "删除成功"})
+
+
 class CartInfo(BaseVerifyView):
     def get(self, request):
         tellphone = request.session.get("tellphone")
@@ -86,3 +112,4 @@ class Cart(View):
 
         }
         return render(request, "shop/shopcart.html", context)
+
