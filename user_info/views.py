@@ -1,6 +1,5 @@
 import random
 import uuid
-
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse
 from django.views import View

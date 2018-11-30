@@ -75,7 +75,7 @@ class ProSKU(models.Model):
         return self.pro_name
 
     class Meta:
-        verbose_name = "商品管理"
+        verbose_name = "商品sku管理"
         verbose_name_plural = verbose_name
 
 
@@ -96,7 +96,7 @@ class ProSPU(models.Model):
         return self.spu_name
 
     class Meta:
-        verbose_name = "商品SPU"
+        verbose_name = "商品SPU管理"
         verbose_name_plural = verbose_name
 
 

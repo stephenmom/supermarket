@@ -1,10 +1,11 @@
 from django.contrib import admin
 
 # Register your models here
-from order.models import OderInfo, Payment, Transport
+from order.models import OderInfo, Payment, Transport,OrderGoods
 
 admin.site.register(Payment)
 admin.site.register(Transport)
+admin.site.register(OrderGoods)
 
 
 @admin.register(OderInfo)
