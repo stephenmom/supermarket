@@ -1,0 +1,170 @@
+{% load  static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>超市</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <link href="{% static 'css/amazeui.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css"/>
+    <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>
+    <script src="{% static 'js/time.js' %}"></script>
+</head>
+<body>
+<header data-am-widget="header" class="am-header am-header-default sq-head ">
+    <div class="am-header-left am-header-nav">
+        <a href="javascript:history.back()" class="">
+            <i class="am-icon-chevron-left"></i>
+        </a>
+    </div>
+    <h1 class="am-header-title">
+        <a href="" class="">注册</a>
+    </h1>
+</header>
+<div style="height: 49px;"></div>
+<!--<div class="login-logo">
+    <img src="images/logo.png" />
+</div>-->
+<div style="height: 3rem;"></div>
+
+
+<form action="" method="post" onsubmit="return check_form()">
+    {% csrf_token %}
+    {#    注册页面的手机号码 nama 为 tellphone#}
+    <input type="text" name="tellphone" placeholder="请输入手机号" class="login-name">
+    <input type="password" name="password" placeholder="请输入密码" class="login-password">
+    <input type="password" placeholder="确认密码" class="login-name">
+    <div class="yzm" style="margin-top: 1.5rem;">
+        <input type="text" class="reg-yzm" placeholder="输入验证码"/>
+        <input type="button" class="yzm-hq" value="获取验证码"/>
+    </div>
+    <input type="submit" class="login-btn" value="立即注册">
+    <div class="agree">
+        <input type="checkbox" name="checkbox" value="同意" checked="">&nbsp;同意
+        <a href="" class="xy">《用户协议》</a>
+
+        <div class="r-login">已有账号，请<a href="{% url 'user_info:login' %}" class="l-login">登录</a></div>
+    </div>
+    <div id="emess" style="color: red">
+
+    </div>
+</form>
+<script type="text/javascript" language="JavaScript">
+    // 获取电话号码输入框的对象
+    var tellphone = $("input[name='tellphone']");
+    // 获取密码输入框的对象
+    var password = $("input[name='password']");
+    // 获取确认密码输入框的对象
+    var repassword = $("input[placeholder='确认密码']");
+    // 获取验证码输入框的对象
+    var ma = $(".reg-yzm");
+
+    /*
+     * 表单提到验证
+     */
+    function check_form() {
+        if (!checkPhone(tellphone.val())) {
+            $("#emess").text("手机号码不正确");
+            return false;
+        }
+        if (!ispassword(password.val())) {
+            $("#emess").text("密码最少6位,包括至少1个大写字母，1个小写字母，1个数字，1个特殊字符");
+            return false;
+        }
+        if (repassword.val() != password.val()) {
+            $("#emess").text("确认密码不正确");
+            return false;
+        }
+        if (ma.val() != "1234") {
+            $("#emess").text("验证码不正确");
+            return false;
+        }
+        $("#emess").text("");
+        return true;
+    }
+
+    /*
+     * 邮箱正则表达式
+     */
+    function isEmailNo(email) {
+        var pattern = /^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$/;
+        return pattern.test(email);
+    }
+
+    /*
+     * 密码正则表达式
+     */
+    function ispassword(password) {
+        //密码强度正则，最少6位，包括至少1个大写字母，1个小写字母，1个数字，1个特殊字符
+        var pattern = /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? ]).*$/;
+        return pattern.test(password);
+    }
+
+    /*
+     * 手机正则表达式,13,14,15,17,18开头的11位手机号码
+     */
+    function checkPhone(phone) {
+        //13,14,15,17,18开头的11位手机号码
+        if (!(/^1[34578]\d{9}$/.test(phone))) {
+            return false;
+        }
+        return true;
+    }
+
+    //代码
+    $(".yzm-hq").on("click", function () {
+        //打印
+        //验证
+        //获取手机号码的文本框的值
+        var phone = tellphone.val();
+        // 自己判断
+        var reg = /^1[34578]\d{9}$/;
+        if (!reg.test(phone)) {
+            $("#emess").text("手机号码不正确");
+            return;
+        }
+        $("#emess").text("");
+        var that = this;
+        //发生ajax到后台进行验证
+        $.ajax({
+            type: "post",
+            url: "{% url 'user_info:send_msg_phone' %}",
+            data: {"phone": phone, "csrfmiddlewaretoken": "{{ csrf_token }}"},
+            dataType: "json",
+            success: function (data) {
+                if (data.err == 0) {
+                    //发送成功,开始倒计时
+                    var count = 60;
+                    //颜色变灰
+                    $(that).css("background-color", "gray");
+                    //不能再点击
+                    $(that).attr("disabled", "disabled");
+                    var timer = window.setInterval(function () {
+                        //周期性执行函数
+                        --count;
+                        var msg = count + "秒后重新发送";
+                        $(that).val(msg);
+                        //判断count为0的时候,重新可以点击
+                        if (count == 0) {
+                            //颜色变灰
+                            $(that).css("background-color", "#76bb2a");
+                            //不能再点击
+                            $(that).removeAttr("disabled");
+                            //文字显示原来提示
+                            $(that).val("获取验证码");
+                            //清除定时
+                            window.clearInterval(timer);
+                        }
+                    }, 1000);
+                }
+            }
+        })
+    })
+</script>
+</body>
+</html>

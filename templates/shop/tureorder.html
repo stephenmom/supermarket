@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>超市</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <link href="{% static 'css/amazeui.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css"/>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/amazeui.min.js' %}"></script>
+</head>
+<body>
+<header data-am-widget="header" class="am-header am-header-default sq-head ">
+    <div class="am-header-left am-header-nav">
+        <a href="{% url 'cart:cart_info' %}" class="">
+            <i class="am-icon-chevron-left"></i>
+        </a>
+    </div>
+    <h1 class="am-header-title">
+        <a href="" class="">确认订单</a>
+    </h1>
+</header>
+<div style="height: 49px;"></div>
+
+<form action="" method="post" id="order_form">
+    {% csrf_token %}
+
+
+{% if addr %}
+    <div class="order-name">
+    <input type="hidden" name="address_id" value="{{ addr.pk }}">
+        <a href="{% url 'user_info:address' %}">
+            <p class="order-tele">{{ addr.goods_user_name }}&nbsp;&nbsp;&nbsp;{{ addr.goods_user_phone }}</p>
+            <p class="order-add">
+                {{ addr.province_id }}{{ addr.city_id }}{{ addr.district_id }}{{ addr.goods_detail }}</p>
+        </a>
+        <i class="am-icon-angle-right"></i>
+    </div>
+{% else %}
+    <div class="add-address">
+        <a href="{% url 'user_info:address' %}">+新建收货地址</a>
+        <i class="am-icon-angle-right"></i>
+    </div>
+{% endif %}
+
+<div style="background: #eee; height: 10px;"></div>
+<ul class="shopcart-list" style="padding-bottom: 0;">
+    {% for sku in skus %}
+        <input type="hidden" name="sku_id" value="{{ sku.pk }}">
+        <li>
+            <img src="{{ sku.pro_logo.url }}" class="shop-pic"/>
+            <div class="order-mid">
+                <div class="tit">{{ sku.pro_spu_id.spu_name }} {{ sku.pro_name }} 包邮</div>
+                <div class="order-price">￥{{ sku.pro_price }} <i>X{{ sku.count }}</i></div>
+            </div>
+        </li>
+
+    {% endfor %}
+</ul>
+<ul class="order-infor">
+    <li class="order-infor-first">
+        <span>商品总计：</span>
+        <i>￥<span id="goods_price">{{ total_price }}</span></i>
+    </li>
+    <li class="order-infor-first">
+        <span>运费：</span>
+        <i>
+            <select name="transport" id="transport">
+                {% for transport in transports %}
+                    <option value="{{ transport.pk }}"
+                            price="{{ transport.money }}">{{ transport.name }}-￥{{ transport.money }}</option>
+                {% endfor %}
+            </select>
+        </i>
+    </li>
+    <li class="order-infor-first">
+        <a href="">积分抵费></a>
+    </li>
+    <li class="order-infor-first">
+        <a href="">选择优惠券></a>
+    </li>
+</ul>
+</form>
+<div style="background: #eee; height: 10px;"></div>
+<textarea placeholder="备注说明" class="bz-infor"></textarea>
+<div style="background: #eee; height: 10px;"></div>
+<div style="height: 55px;"></div>
+<div class="shop-fix">
+    <div class="order-text">
+        应付总额：<span>￥<i id="sum_price">0:00</i></span>
+    </div>
+    <a href="javascript:;" class="js-btn">提交订单</a>
+</div>
+<!--底部-->
+<div style="height: 55px;"></div>
+<div data-am-widget="navbar" class="am-navbar am-cf am-navbar-default sq-foot am-no-layout" id="">
+    <ul class="am-navbar-nav am-cf am-avg-sm-5">
+        <li>
+            <a href="index.html" class="">
+                <span class="am-icon-home"></span>
+                <span class="am-navbar-label">首页</span>
+            </a>
+        </li>
+        <li>
+            <a href="message.html" class="">
+                <span class="am-icon-comments"></span>
+                <span class="am-navbar-label">动态</span>
+            </a>
+        </li>
+        <li>
+            <a href="shopcart.html" class="">
+                <span class="am-icon-shopping-cart"></span>
+                <span class="am-navbar-label">购物车</span>
+            </a>
+        </li>
+        <li>
+            <a href="allorder.html" class="">
+                <span class="am-icon-file-text"></span>
+                <span class="am-navbar-label">订单</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="member.html" class="curr">
+                <span class="am-icon-user"></span>
+                <span class="am-navbar-label">我的</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<script type="text/javascript" language="JavaScript">
+    //计算总价格
+    function totalPrice() {
+        var goods_price = $("#goods_price").text();
+        var trans_price = $("#transport").find(":selected").attr("price");
+        // js + 也是具有字符串拼接
+        var total = parseFloat(goods_price) + parseFloat(trans_price);
+        $("#sum_price").text(total.toFixed(2));
+    }
+    totalPrice();
+    //运输方式改变之后价格重新计算
+    $("#transport").on("change", function () {
+        totalPrice();
+    });
+    //确认订单绑定点击事件,通过ajax提交订单数据
+    $(".js-btn").on("click", function () {
+        //准备数据
+        var data = $("#order_form").serialize();
+        //判断收货地址必须有, 运输方式必须选择
+        //发送ajax
+        console.debug(data);
+        $.ajax({
+            type: "POST",
+            url: "{% url 'order:submitorder' %}",
+            data: data,
+            dataType: "json",
+            success: function (data) {
+                if (data.code == 0) {
+                    //跳转到订单确认页面
+                    location.href = "{% url 'order:order_now' %}?order_sn=" + data.order_sn;
+                } else {
+                    alert("订单创建失败!");
+                }
+            }
+        })
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+{% load  static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>超市</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <link href="{% static 'css/amazeui.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css"/>
+    <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>
+    <script src="{% static 'js/time.js' %}"></script>
+</head>
+<body>
+<header data-am-widget="header" class="am-header am-header-default sq-head ">
+    <div class="am-header-left am-header-nav">
+        <a href="javascript:history.back()" class="">
+            <i class="am-icon-chevron-left"></i>
+        </a>
+    </div>
+    <h1 class="am-header-title">
+        <a href="" class="">登录</a>
+    </h1>
+</header>
+<div style="height: 49px;"></div>
+<!--<div class="login-logo">
+    <img src="images/logo.png" />
+</div>-->
+<div style="height: 3rem;"></div>
+<form action="" method="post" onsubmit="return check_login()">
+    {% csrf_token %}
+
+    <input type="text" name="tellphone" id="tellphone" placeholder="请输入用户名/手机号" class="login-name">
+    <input type="password" name="password" id="password" placeholder="请输入密码" class="login-password">
+    <input type="submit" class="login-btn" value="我要登录" id="ti1">
+    <div id="e1" style="color: red"></div>
+</form>
+<div class="agree">
+    <a href="{% url 'user_info:register' %}">免费注册</a>
+    <a href="{% url 'user_info:forget' %}" class="forget">忘记密码？</a>
+</div>
+<div class="line"></div>
+<div class="line-text">第三方账号登录</div>
+<ul class="second-login">
+    <li><a href="javascript:;"><img src="{% static 'images/wxlogin.png' %}"/></a></li>
+    <li><a href="javascript:;"><img src="{% static 'images/qqlogin.png' %}"/></a></li>
+    <li><a href="javascript:;"><img src="{% static 'images/sinalog.png' %}"/></a></li>
+</ul>
+<script type="text/javascript" language="JavaScript">
+    var tellphone = $("#tellphone");
+    var password = $("#password");
+
+    function button_close() {
+        $("#ti1").css("background-color", "grey");
+        $("#ti1").val("登录失败,10秒之后重试");
+        $("#ti1").attr("disabled", true);
+    }
+
+    function button_open() {
+        $("#ti1").css("background-color", "#cb2527");
+        $("#ti1").val("我要登录")
+        $("#ti1").attr("disabled", false);
+    }
+
+    /*
+    * 用户名登录表单检查
+    * */
+    function check_login() {
+        if (!checkPhone(tellphone.val())) {
+            $("#e1").text("手机号码不正确");
+            return false;
+        }
+        if (!ispassword(password.val())) {
+            $("#e1").text("密码最少6位,包括至少1个大写字母，1个小写字母，1个数字，1个特殊字符");
+            return false;
+        }
+        return true;
+    }
+
+    /*
+ * 手机正则表达式,13,14,15,17,18开头的11位手机号码
+ */
+    function checkPhone(phone) {
+        //13,14,15,17,18开头的11位手机号码
+        if (!(/^1[34578]\d{9}$/.test(phone))) {
+            return false;
+        }
+        return true;
+    }
+
+    function ispassword(password) {
+        //密码强度正则，最少6位，包括至少1个大写字母，1个小写字母，1个数字，1个特殊字符
+        var pattern = /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? ]).*$/;
+        return pattern.test(password);
+    }
+</script>
+{% if error == "login_fail" %}
+    <script type="text/javascript" language="JavaScript">
+        button_close();
+        setTimeout("button_open()", 10000);
+    </script>
+{% endif %}
+</body>
+</html>

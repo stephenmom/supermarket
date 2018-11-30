@@ -1,0 +1,300 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>超市</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <link href="{% static 'css/amazeui.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css"/>
+    <script src="{% static 'js/jquery-1.10.2.min.js' %}"></script>
+</head>
+<body>
+<header data-am-widget="header" class="am-header am-header-default sq-head ">
+    <div class="am-header-left am-header-nav">
+        <a href="javascript:history.back()" class="">
+            <i class="am-icon-chevron-left"></i>
+        </a>
+    </div>
+    <h1 class="am-header-title">
+        <a href="" class="">购物车</a>
+    </h1>
+</header>
+<!--购物车空的状态-->
+<div style="height: 38px; background: #eee;"></div>
+<ul class="shopcart-list">
+    {% for sku in skus %}
+        <li>
+            <label class="am-checkbox am-warning">
+                <input type="checkbox" checked="checked" class="ck1" value="" data-am-ucheck checked>
+            </label>
+            <a href="{% url 'product:detail' sku.pk %}"><img src="{{ sku.pro_logo.url }}" class="shop-pic"/></a>
+            <div class="shop-list-mid">
+                <div class="tit"><a
+                        href="{% url 'product:detail' sku.pk %}">{{ sku.pro_spu_id.spu_name }} {{ sku.pro_name }}</a>
+                </div>
+                <b class="shop-list-price">￥<span class="price_sku" sku-id="{{ sku.pk }}">{{ sku.pro_price }}</span></b>
+            </div>
+            <div class="list-cart1">
+                <div class="d-stock">
+                    <a class="decrease">-</a>
+                    <input id="num" readonly="" class="text_box" name="" type="text" value="{{ sku.count }}">
+                    <a class="increase">+</a>
+                    <input type="hidden" class="pk" value="{{ sku.pk }}">
+                </div>
+            </div>
+        </li>
+
+
+    {% empty %}
+        <div class="login-logo">
+            <img src="{% static 'images/care.png' %}">
+            <p>亲、您的购物车还是空空的哦，快去装满它!</p>
+            <a href="{% url 'product:cate' %}" class="goshopping">前去逛逛</a>
+        </div>
+    {% endfor %}
+</ul>
+<div class="shop-fix">
+
+    <label class="am-checkbox am-warning">
+        <input type="checkbox" checked="checked" id="select_all" value="" data-am-ucheck checked>
+    </label>
+    <a class="del">全选</a>
+    <a href="javascript:;" class="js-btn">去结算</a>
+    <!--<form action="" method="post" onsubmit="return jssp()">
+        <input type="submit" class="js-btn" value="去结算">
+    </form>-->
+    <div class="js-text">
+        <P>合计：<b>￥<span id="total_price"></span></b></P>
+        <p class="js-car">免费配送</p>
+    </div>
+</div>
+
+<!--底部-->
+<div style="height: 55px;"></div>
+<div data-am-widget="navbar" class="am-navbar am-cf am-navbar-default sq-foot am-no-layout" id="">
+    <ul class="am-navbar-nav am-cf am-avg-sm-5">
+        <li>
+            <a href="{% url 'product:show' %}" class="">
+                <span class="am-icon-home"></span>
+                <span class="am-navbar-label">首页</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'product:cate' %}" class="">
+                <span class="am-icon-comments"></span>
+                <span class="am-navbar-label">动态</span>
+            </a>
+        </li>
+        <li>
+            <a href="javascript:;" class="">
+                <span class="am-icon-shopping-cart"></span>
+                <span class="am-navbar-label">购物车</span>
+            </a>
+        </li>
+        <li>
+            <a href="allorder.html" class="">
+                <span class="am-icon-file-text"></span>
+                <span class="am-navbar-label">订单</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="{% url 'user_info:member' %}" class="curr">
+                <span class="am-icon-user"></span>
+                <span class="am-navbar-label">我的</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+{% csrf_token %}
+<script>
+    /*
+    * 构造一个input框,传入name和value 这样写不行
+    function creatHtml(name, val) {
+        var input_str = "<input type=\"hidden\" name=\"" + name + "\" value=\"" + val + "\">";
+        return input_str;
+    }
+    function jssp() {
+        console.debug(creatHtml("a1","1"));
+        return false;
+    }
+    */
+    /*
+    * 拼接选中的sku_id
+    */
+    function is_selected() {
+        var price_sku = $(".price_sku");
+        var select_sku_id = new Array();
+        //var sku_id_str = "";
+        var ck1 = $(".ck1");
+        for (var i = 0; i < ck1.length; ++i) {
+            if ($(ck1[i]).prop("checked") == true) {
+                var price_int = parseInt($(price_sku[i]).attr("sku-id"));
+                //sku_id_str = sku_id_str + price_int + "||";
+                select_sku_id.push(price_int);
+            }
+        }
+        return select_sku_id;
+    }
+
+    $(function () {
+        $(".js-btn").on("click", function () {
+            var tk = $("input[name='csrfmiddlewaretoken']").val();
+            var select_sku_id = is_selected();
+            var params = {"sku_id": select_sku_id.join("|"), "csrfmiddlewaretoken": tk};
+            console.debug(params);
+            $.ajax({
+                type: "POST",
+                url: "{% url 'order:makeorder' %}",
+                data: params,
+                success: function (data) {
+                    if (data["res"] == 3) {
+                        console.debug("成功");
+                        location.href = "{% url 'order:makeorder' %}?select_id=" + params["sku_id"];
+                    } else {
+                        alert("没有选中商品");
+                        console.debug("失败");
+                    }
+                }
+            });
+        });
+    });
+
+    /*
+     * 重新计算总价格
+     */
+    function change_price() {
+        var price_sku = $(".price_sku");
+        var number_sku = $(".text_box");
+        var ck1 = $(".ck1");
+        var li1 = 0;
+        if (price_sku.length == 0) {
+            $("#total_price").text(li1);
+            return;
+        }
+        for (var i = 0; i < ck1.length; ++i) {
+            if ($(ck1[i]).prop("checked") == true) {
+                var price_int = parseInt($(price_sku[i]).text());
+                var number_int = parseInt($(number_sku[i]).val());
+                li1 += price_int * number_int;
+            }
+        }
+        $("#total_price").text(li1);
+    }
+
+    /*
+     * 当选中商品或者,增加减少商品的操作
+     */
+    $(function () {
+        change_price();
+        $(".ck1").on("click", function () {
+            $(this).prop("checked");
+            change_price();
+        });
+        $("#select_all").on("click", function () {
+            var ck1 = $(".ck1");
+            if ($(this).prop("checked") == true) {
+                for (var i = 0; i < ck1.length; ++i) {
+                    $(ck1[i]).prop("checked", true);
+                }
+            } else {
+                for (var i = 0; i < ck1.length; ++i) {
+                    $(ck1[i]).prop("checked", false);
+                }
+            }
+            change_price();
+        });
+
+    });
+    /*
+     * 购物的数量加减的操作
+     */
+    $(function () {
+        $('.increase').click(function () {
+            var self = $(this);
+            var current_num = parseInt(self.siblings('input').val());
+            current_num += 1;
+            self.siblings('input[class="text_box"]').val(current_num);
+            var tk = $("input[name='csrfmiddlewaretoken']").val();
+            var sku_id = parseInt($(this).siblings('.pk').val());
+            var params = {"sku_id": sku_id, "count": 1, "csrfmiddlewaretoken": tk};
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'cart:add' %}",
+                data: params,
+                success: function (data) {
+                    if (data["res"] == "-1") {
+                        location.href = "{% url 'user_info:login' %}";
+                    }
+                    if (data["res"] == "4") {
+                        console.debug("添加成功");
+                        change_price();
+                    }
+                }
+            });
+        });
+        $('.decrease').click(function () {
+            var self = $(this);
+            var current_num = parseInt(self.siblings('input').val());
+            var tk = $("input[name='csrfmiddlewaretoken']").val();
+            var sku_id = parseInt($(this).siblings('.pk').val());
+            var params = {"sku_id": sku_id, "count": -1, "csrfmiddlewaretoken": tk};
+            var html1 = "       <div class=\"login-logo\">\n" +
+                "            <img src=\"{% static 'images/care.png' %}\">\n" +
+                "            <p>亲、您的购物车还是空空的哦，快去装满它!</p>\n" +
+                "            <a href=\"{% url 'product:cate' %}\" class=\"goshopping\">前去逛逛</a>\n" +
+                "        </div>";
+            if (current_num > 1) {
+                current_num -= 1;
+                self.siblings('input[class="text_box"]').val(current_num);
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'cart:add' %}",
+                    data: params,
+                    success: function (data) {
+                        if (data["res"] == "-1") {
+                            location.href = "{% url 'user_info:login' %}";
+                        }
+                        if (data["res"] == "4") {
+                            console.debug("添加成功");
+                            change_price();
+                        }
+                    }
+                });
+            } else {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'cart:cartchange' %}",
+                    data: {"sku_id": sku_id, "csrfmiddlewaretoken": tk},
+                    success: function (data) {
+                        if (data["res"] == "-1") {
+                            location.href = "{% url 'user_info:login' %}";
+                        }
+                        if (data["res"] == "4") {
+
+                            $(self).parents("li").remove();
+                            var ul1 = $(".shopcart-list").children("li").length;
+                            if (ul1 == 0) {
+                                $(".shopcart-list").append(html1);
+                            }
+                            change_price();
+                        }
+                    }
+                });
+            }
+
+        });
+    })
+</script>
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/amazeui.min.js' %}"></script>
+</body>
+</html>
