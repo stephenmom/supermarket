@@ -226,12 +226,16 @@ class OrderPay(View):
         pass
 
     def post(self, request):
+
+        app_private_key_string = open(os.path.join(settings.BASE_DIR, "order/app_private_key.pem")).read()
+
+        alipay_public_key_string = open(os.path.join(settings.BASE_DIR, "order/alipay_public_key.pem")).read()
         # 接收用户id
         tellphone = request.session.get("tellphone")
         user = Users.objects.get(user_telphone=tellphone)
         # 接收order_sn
         order_number = request.POST.get("order_id")
-        print(order_number)
+
         try:
             order = OderInfo.objects.get(order_number=order_number, user_id=user)
         except OderInfo.DoesNotExist:
@@ -240,9 +244,9 @@ class OrderPay(View):
         alipay = AliPay(
             appid="2016092400584130",
             app_notify_url=None,  # 默认回调url
-            app_private_key_string=os.path.join(settings.BASE_DIR, "order\\app_private_key.pem"),
+            app_private_key_string=app_private_key_string,
             # 支付宝的公钥，验证支付宝回传消息使用，不是你自己的公钥,
-            alipay_public_key_string=os.path.join(settings.BASE_DIR, "order\\alipay_public_key.pem"),
+            alipay_public_key_string=alipay_public_key_string,
             sign_type="RSA2",  # RSA 或者 RSA2
             debug=True,  # 默认False
         )
@@ -254,5 +258,6 @@ class OrderPay(View):
             return_url=None,
             notify_url=None
         )
-        pay_url = "https://openapi.alipay.com/gateway.do?" + order_string
+        pay_url = "https://openapi.alipaydev.com/gateway.do?" + order_string
+
         return JsonResponse({"res": 3, "pay_url": pay_url})

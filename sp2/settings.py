@@ -35,13 +35,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'haystack',
-    'user_info.apps.UserInfoConfig',
-    'product.apps.ProductConfig',
-    'cart.apps.CartConfig',
-    'order.apps.OrderConfig',
-    'ckeditor',
-    'ckeditor_uploader'
+    'haystack',  # 全文检索框架
+    'user_info.apps.UserInfoConfig',  # 用户模块
+    'product.apps.ProductConfig',  # 商品模块
+    'cart.apps.CartConfig',  # 购物车模块
+    'order.apps.OrderConfig',  # 订单模块
+    'ckeditor',  # 富文本编辑框
+    'ckeditor_uploader'  # 富文本编辑框上传插件
 ]
 
 MIDDLEWARE = [

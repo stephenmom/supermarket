@@ -136,7 +136,8 @@
         var params = {"csrfmiddlewaretoken": cf, "order_id": order_id};
         $.post("{% url 'order:pay' %}", params, function (data) {
             if (data["res"] == 3) {
-                location.href = data["pay_utl"];
+                console.debug("接收url,成功");
+                location.href = data["pay_url"];
             } else {
                 console.debug("错误");
             }
